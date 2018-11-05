@@ -3,7 +3,7 @@
 static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
 // UIWebViewDelegate
-@interface FlutterWebviewPlugin() <WKNavigationDelegate, UIScrollViewDelegate> {
+@interface FlutterWebviewPlugin() <WKNavigationDelegate, UIScrollViewDelegate, WKScriptMessageHandler> {
     BOOL _enableAppScheme;
     BOOL _enableZoom;
 }
@@ -26,6 +26,8 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     if (self) {
         self.viewController = viewController;
     }
+
+    
     return self;
 }
 
@@ -92,15 +94,22 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     } else {
         rc = self.viewController.view.bounds;
     }
+
+    //configuration 
+    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    WKUserContentController *controller = [[WKUserContentController alloc] init];
+    [controller addScriptMessageHandler:self name:@"flutterwebview"];
+    configuration.userContentController = controller; 
     
-    self.webview = [[WKWebView alloc] initWithFrame:rc];
+    //webview
+    self.webview = [[WKWebView alloc] initWithFrame:rc configuration:configuration ];
     self.webview.navigationDelegate = self;
     self.webview.scrollView.delegate = self;
     self.webview.hidden = [hidden boolValue];
     self.webview.scrollView.showsHorizontalScrollIndicator = [scrollBar boolValue];
     self.webview.scrollView.showsVerticalScrollIndicator = [scrollBar boolValue];
 
-
+    
 
     _enableZoom = [withZoom boolValue];
 
@@ -261,6 +270,34 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     if (scrollView.pinchGestureRecognizer.isEnabled != _enableZoom) {
         scrollView.pinchGestureRecognizer.enabled = _enableZoom;
     }
+}
+
+- (void) userContentController:(WKUserContentController *)userContentController
+      didReceiveScriptMessage:(WKScriptMessage *)message {
+    if ([message.name isEqualToString:@"flutterwebview"]) {
+        [self alertText:@"hi" withMsg: @"start"];
+        if( [message.body isKindOfClass:[NSString class]] ){
+            [self alertText:@"hi" withMsg:message.body];
+        }else if([message.body isKindOfClass:[NSObject class]]){
+            [self alertText:@"hi" withMsg: @"NSObject"];
+        }else{
+            [self alertText:@"hi" withMsg: NSStringFromClass([message.body class])];
+        }
+        
+    }      
+}
+
+-(void) alertText:(NSString *)title 
+    withMsg:(NSString *)msg {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:title
+                        message:msg
+                        preferredStyle:UIAlertControllerStyleAlert];
+
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+    handler:^(UIAlertAction * action) {}];
+
+    [alert addAction:defaultAction];
+    [[self viewController] presentViewController:alert animated:YES completion:nil];                  
 }
 
 @end
