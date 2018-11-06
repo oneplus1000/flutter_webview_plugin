@@ -17,7 +17,6 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     
     UIViewController *viewController = (UIViewController *)registrar.messenger;
     FlutterWebviewPlugin* instance = [[FlutterWebviewPlugin alloc] initWithViewController:viewController];
-    
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -26,8 +25,6 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     if (self) {
         self.viewController = viewController;
     }
-
-    
     return self;
 }
 
@@ -109,7 +106,6 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     self.webview.scrollView.showsHorizontalScrollIndicator = [scrollBar boolValue];
     self.webview.scrollView.showsVerticalScrollIndicator = [scrollBar boolValue];
 
-    
 
     _enableZoom = [withZoom boolValue];
 
@@ -272,18 +268,33 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     }
 }
 
+//call from webkit
 - (void) userContentController:(WKUserContentController *)userContentController
       didReceiveScriptMessage:(WKScriptMessage *)message {
+
     if ([message.name isEqualToString:@"flutterwebview"]) {
-        [self alertText:@"hi" withMsg: @"start"];
-        if( [message.body isKindOfClass:[NSString class]] ){
-            [self alertText:@"hi" withMsg:message.body];
-        }else if([message.body isKindOfClass:[NSObject class]]){
-            [self alertText:@"hi" withMsg: @"NSObject"];
-        }else{
-            [self alertText:@"hi" withMsg: NSStringFromClass([message.body class])];
+        //[self alertText:@"hi" withMsg: @"start"];
+        //if( [message.body isKindOfClass:[NSString class]] ){
+        //    [self alertText:@"hi" withMsg:message.body];
+        //} else 
+        if( [message.body isKindOfClass:[NSDictionary class]] ){ 
+            //[self alertText:@"mmm" withMsg: NSStringFromClass([message.body[@"argsCount"] class]) ];
+            /*NSString *funcname = @"";
+            NSNumber *argsCount = [NSNumber numberWithInteger:0];
+            NSMutableArray *argsType = [[NSMutableArray alloc] init];
+            if([message.body[@"funcname"] isKindOfClass:[NSString class]]){
+                funcname = message.body[@"funcname"];  
+            }
+            if([message.body[@"argsCount"] isKindOfClass:[NSNumber class]]){
+                argsCount = message.body[@"argsCount"];
+            }
+            if([message.body[@"argsType"] isKindOfClass:[NSArray class]]){
+                [self alertText:@"hix" withMsg: NSStringFromClass([message.body[@"argsType"]  class])];
+            }
+            if([message.body[@"argsVal"] isKindOfClass:[NSArray class]]){}
+            */
+            [channel invokeMethod: @"onJsCallFlutterFunc" arguments:message.body];
         }
-        
     }      
 }
 

@@ -22,6 +22,7 @@ class FlutterWebviewPlugin {
   final _onScrollXChanged = new StreamController<double>.broadcast();
   final _onScrollYChanged = new StreamController<double>.broadcast();
   final _onHttpError = new StreamController<WebViewHttpError>.broadcast();
+  final _onJsCallFlutterFunc = new StreamController<WebViewJsCall>.broadcast();
 
   static FlutterWebviewPlugin _instance;
 
@@ -55,7 +56,18 @@ class FlutterWebviewPlugin {
         _onHttpError.add(
             WebViewHttpError(call.arguments['code'], call.arguments['url']));
         break;
+      case 'onJsCallFlutterFunc':
+        _jsCallFlutterFuncHandle(call);
+        break;
     }
+  }
+
+  Future<void> _jsCallFlutterFuncHandle(MethodCall call) async {
+    final Map map = call.arguments;
+    String funcname = map['funcname'];
+    var jscall = WebViewJsCall();
+    jscall.funcname = funcname;
+    _onJsCallFlutterFunc.add(jscall);
   }
 
   /// Listening the OnDestroy LifeCycle Event for Android
@@ -249,6 +261,12 @@ class WebViewStateChanged {
 class WebViewHttpError {
   final String url;
   final String code;
-
   WebViewHttpError(this.code, this.url);
+}
+
+class WebViewJsCall {
+  String funcname;
+  int argsCount;
+  Map<String, String> argsType;
+  Map<String, String> argsVal;
 }
