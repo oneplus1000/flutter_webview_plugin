@@ -22,7 +22,7 @@ class FlutterWebviewPlugin {
   final _onScrollXChanged = new StreamController<double>.broadcast();
   final _onScrollYChanged = new StreamController<double>.broadcast();
   final _onHttpError = new StreamController<WebViewHttpError>.broadcast();
-  final _onJsCallFlutterFunc = new StreamController<WebViewJsCall>.broadcast();
+  final _onJsCallFlutter = new StreamController<WebViewJsCall>.broadcast();
 
   static FlutterWebviewPlugin _instance;
 
@@ -56,7 +56,7 @@ class FlutterWebviewPlugin {
         _onHttpError.add(
             WebViewHttpError(call.arguments['code'], call.arguments['url']));
         break;
-      case 'onJsCallFlutterFunc':
+      case 'onJsCallFlutter':
         _jsCallFlutterFuncHandle(call);
         break;
     }
@@ -64,10 +64,29 @@ class FlutterWebviewPlugin {
 
   Future<void> _jsCallFlutterFuncHandle(MethodCall call) async {
     final Map map = call.arguments;
-    String funcname = map['funcname'];
-    var jscall = WebViewJsCall();
+    final String funcname = map['funcname'];
+    final jscall = WebViewJsCall();
     jscall.funcname = funcname;
-    _onJsCallFlutterFunc.add(jscall);
+    if (map['argsType'] is List) {
+      for (var item in map['argsType']) {
+        if (item is String) {
+          jscall.argsType.add(item);
+        }
+      }
+    }
+    if (map['argsVal'] is List) {
+      for (var item in map['argsVal']) {
+        if (item is String) {
+          jscall.argsVal.add(item);
+        }
+      }
+    }
+
+    if (map['argsCount'] is double) {
+      jscall.argsCount = map['argsCount'].round(); //ยังไงมันก็เป็น int
+    }
+
+    _onJsCallFlutter.add(jscall);
   }
 
   /// Listening the OnDestroy LifeCycle Event for Android
@@ -88,6 +107,8 @@ class FlutterWebviewPlugin {
   Stream<double> get onScrollXChanged => _onScrollXChanged.stream;
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
+
+  Stream<WebViewJsCall> get onJsCallFlutter => _onJsCallFlutter.stream;
 
   /// Start the Webview with [url]
   /// - [headers] specify additional HTTP headers
@@ -183,6 +204,14 @@ class FlutterWebviewPlugin {
     await _channel.invokeMethod('reloadUrl', args);
   }
 
+  Future setContentOffset(double x, double y) async {
+    final args = <String, double>{
+      'x': x,
+      'y': y,
+    };
+    await _channel.invokeMethod('setContentOffset', args);
+  }
+
   // Stops current loading process
   Future stopLoading() => _channel.invokeMethod("stopLoading");
 
@@ -267,6 +296,6 @@ class WebViewHttpError {
 class WebViewJsCall {
   String funcname;
   int argsCount;
-  Map<String, String> argsType;
-  Map<String, String> argsVal;
+  List<String> argsType = [];
+  List<String> argsVal = [];
 }

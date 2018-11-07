@@ -57,9 +57,24 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     } else if ([@"stopLoading" isEqualToString:call.method]) {
         [self stopLoading];
         result(nil);
+    } else if([@"setContentOffset" isEqualToString:call.method]){
+        [self setContentOffset:call];
+        result(nil);
     } else {
         result(FlutterMethodNotImplemented);
     }
+}
+
+- (void) setContentOffset:(FlutterMethodCall*)call {
+    NSNumber *x = call.arguments[@"x"];
+    NSNumber *y = call.arguments[@"y"];
+    CGFloat floatX = (CGFloat)x.doubleValue;
+    CGFloat floatY = (CGFloat)y.doubleValue;
+    //[self alertText:@"setContentOffset" withMsg:@"mmmmm"];
+    //(CGFloat)x withY: (CGFloat) y
+    CGPoint point = CGPointMake(floatX,floatY);
+    [self.webview.scrollView setContentOffset:point animated:true];
+    //self.webview.scrollView.contentOffset = point;
 }
 
 - (void)initWebview:(FlutterMethodCall*)call {
@@ -293,7 +308,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
             }
             if([message.body[@"argsVal"] isKindOfClass:[NSArray class]]){}
             */
-            [channel invokeMethod: @"onJsCallFlutterFunc" arguments:message.body];
+            [channel invokeMethod: @"onJsCallFlutter" arguments:message.body];
         }
     }      
 }
@@ -303,10 +318,8 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:title
                         message:msg
                         preferredStyle:UIAlertControllerStyleAlert];
-
     UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
     handler:^(UIAlertAction * action) {}];
-
     [alert addAction:defaultAction];
     [[self viewController] presentViewController:alert animated:YES completion:nil];                  
 }
