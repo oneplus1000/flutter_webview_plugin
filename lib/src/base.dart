@@ -19,8 +19,12 @@ class FlutterWebviewPlugin {
   final _onDestroy = new StreamController<Null>.broadcast();
   final _onUrlChanged = new StreamController<String>.broadcast();
   final _onStateChanged = new StreamController<WebViewStateChanged>.broadcast();
-  final _onScrollXChanged = new StreamController<double>.broadcast();
-  final _onScrollYChanged = new StreamController<double>.broadcast();
+  final _onScrollXChanged = new StreamController<ScrollData>.broadcast();
+  final _onScrollYChanged = new StreamController<ScrollData>.broadcast();
+  final _onScrollXViewWillEndDragging =
+      new StreamController<ScrollData>.broadcast();
+  final _onScrollYViewWillEndDragging =
+      new StreamController<ScrollData>.broadcast();
   final _onHttpError = new StreamController<WebViewHttpError>.broadcast();
   final _onJsCallFlutter = new StreamController<WebViewJsCall>.broadcast();
 
@@ -40,13 +44,19 @@ class FlutterWebviewPlugin {
       case 'onUrlChanged':
         _onUrlChanged.add(call.arguments['url']);
         break;
-      case "onScrollXChanged":
-        _onScrollXChanged.add(call.arguments["xDirection"]);
+      case 'onScrollXChanged':
+        final pos = ScrollData();
+        pos.position = call.arguments['xDirection'];
+        pos.isTouch = call.arguments['isTouch'];
+        _onScrollXChanged.add(pos);
         break;
-      case "onScrollYChanged":
-        _onScrollYChanged.add(call.arguments["yDirection"]);
+      case 'onScrollYChanged':
+        final pos = ScrollData();
+        pos.position = call.arguments['yDirection'];
+        pos.isTouch = call.arguments['isTouch'];
+        _onScrollYChanged.add(pos);
         break;
-      case "onState":
+      case 'onState':
         _onStateChanged.add(
           new WebViewStateChanged.fromMap(
               new Map<String, dynamic>.from(call.arguments)),
@@ -55,6 +65,18 @@ class FlutterWebviewPlugin {
       case 'onHttpError':
         _onHttpError.add(
             WebViewHttpError(call.arguments['code'], call.arguments['url']));
+        break;
+      case 'scrollXViewWillEndDragging':
+        var pos = ScrollData();
+        pos.position = call.arguments['xDirection'];
+        pos.isTouch = call.arguments['isTouch'];
+        _onScrollXViewWillEndDragging.add(pos);
+        break;
+      case 'scrollYViewWillEndDragging':
+        var pos = ScrollData();
+        pos.position = call.arguments['yDirection'];
+        pos.isTouch = call.arguments['isTouch'];
+        _onScrollYViewWillEndDragging.add(pos);
         break;
       case 'onJsCallFlutter':
         _jsCallFlutterFuncHandle(call);
@@ -101,10 +123,15 @@ class FlutterWebviewPlugin {
   Stream<WebViewStateChanged> get onStateChanged => _onStateChanged.stream;
 
   /// Listening web view y position scroll change
-  Stream<double> get onScrollYChanged => _onScrollYChanged.stream;
+  Stream<ScrollData> get onScrollYChanged => _onScrollYChanged.stream;
 
   /// Listening web view x position scroll change
-  Stream<double> get onScrollXChanged => _onScrollXChanged.stream;
+  Stream<ScrollData> get onScrollXChanged => _onScrollXChanged.stream;
+
+  Stream<ScrollData> get onScrollXViewWillEndDragging =>
+      _onScrollXViewWillEndDragging.stream;
+  Stream<ScrollData> get onScrollYViewWillEndDragging =>
+      _onScrollYViewWillEndDragging.stream;
 
   Stream<WebViewHttpError> get onHttpError => _onHttpError.stream;
 
@@ -204,6 +231,11 @@ class FlutterWebviewPlugin {
     await _channel.invokeMethod('reloadUrl', args);
   }
 
+  Future<bool> touchInfo() async {
+    bool result = await _channel.invokeMethod('touchInfo');
+    return result;
+  }
+
   Future setContentOffset(double x, double y) async {
     final args = <String, double>{
       'x': x,
@@ -298,4 +330,9 @@ class WebViewJsCall {
   int argsCount;
   List<String> argsType = [];
   List<String> argsVal = [];
+}
+
+class ScrollData {
+  double position;
+  bool isTouch;
 }

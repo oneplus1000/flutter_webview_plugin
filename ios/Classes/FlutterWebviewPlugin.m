@@ -60,9 +60,17 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     } else if([@"setContentOffset" isEqualToString:call.method]){
         [self setContentOffset:call];
         result(nil);
+    } else if([@"touchInfo" isEqualToString:call.method]){
+        BOOL isTouch = [self touchInfo:call];
+        //NSNumber *result = [NSNumber numberWithBool:isTouch];
+        result(@(isTouch));
     } else {
         result(FlutterMethodNotImplemented);
     }
+}
+
+-(BOOL) touchInfo:(FlutterMethodCall*)call{
+    return self.webview.scrollView.tracking;
 }
 
 - (void) setContentOffset:(FlutterMethodCall*)call {
@@ -136,12 +144,22 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
                       [[rect valueForKey:@"height"] doubleValue]);
 }
 
-- (void) scrollViewDidScroll:(UIScrollView *)scrollView {
-    id xDirection = @{@"xDirection": @(scrollView.contentOffset.x) };
+- (void) scrollViewDidScroll:(UIScrollView *)scrollView { 
+    id xDirection = @{@"xDirection": @(scrollView.contentOffset.x), @"isTouch":@(scrollView.tracking)};
     [channel invokeMethod:@"onScrollXChanged" arguments:xDirection];
 
-    id yDirection = @{@"yDirection": @(scrollView.contentOffset.y) };
+    id yDirection = @{@"yDirection": @(scrollView.contentOffset.y), @"isTouch":@(scrollView.tracking)};
     [channel invokeMethod:@"onScrollYChanged" arguments:yDirection];
+}
+
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView 
+                     withVelocity:(CGPoint)velocity 
+              targetContentOffset:(inout CGPoint *)targetContentOffset {
+    id xDirection = @{@"xDirection": @(scrollView.contentOffset.x), @"isTouch":@(scrollView.tracking)};
+    [channel invokeMethod:@"scrollXViewWillEndDragging" arguments:xDirection]; 
+
+    id yDirection = @{@"yDirection": @(scrollView.contentOffset.y), @"isTouch":@(scrollView.tracking)};
+    [channel invokeMethod:@"scrollYViewWillEndDragging" arguments:yDirection];             
 }
 
 - (void)navigate:(FlutterMethodCall*)call {
