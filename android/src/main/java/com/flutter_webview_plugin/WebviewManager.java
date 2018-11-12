@@ -92,7 +92,6 @@ class WebviewManager {
                         return true;
                     }
                 }
-
                 return false;
             }
         });
