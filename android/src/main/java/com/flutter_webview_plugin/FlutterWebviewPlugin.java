@@ -13,11 +13,16 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.PluginRegistry;
+import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 
 /**
  * FlutterWebviewPlugin
  */
 public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.ActivityResultListener {
+    private static String TAG = "FlutterWebviewPlugin";
     private Activity activity;
     private WebviewManager webViewManager;
     static MethodChannel channel;
@@ -108,15 +113,31 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         FrameLayout.LayoutParams params = buildLayoutParams(call);
 
         addContentView(activity, params);
-        // activity.addContentView(webViewManager.webView, params);
+        Log.d(TAG, "hidden:" + hidden + " url:" + url + " userAgent:" + userAgent + " withJavascript:" + withJavascript
+                + " clearCache:" + clearCache);
+        Log.d(TAG, "clearCookies:" + clearCookies + " withZoom=" + withZoom + " withLocalStorage=" + withLocalStorage
+                + " headers:" + headers + " scrollBar:" + scrollBar);
 
-        webViewManager.openUrl(withJavascript, clearCache, hidden, clearCookies, userAgent, url, headers, withZoom,
-                withLocalStorage, scrollBar);
+        // activity.addContentView(webViewManager.webView, params);
+        // webViewManager.openUrl(withJavascript, clearCache, hidden, clearCookies,
+        // userAgent, url, headers, withZoom,
+        // withLocalStorage, scrollBar);
+
         result.success(null);
     }
 
     private void addContentView(Activity activity, FrameLayout.LayoutParams params) {
-        activity.addContentView(webViewManager.webView, params);
+        ViewPager pager = new ViewPager(activity);
+        /*
+         * LinearLayout layout = new LinearLayout(activity); LinearLayout.LayoutParams
+         * layoutParams1 = new
+         * LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+         * LinearLayout.LayoutParams.MATCH_PARENT, 2f);
+         * layout.setLayoutParams(layoutParams1); layout.addView(pager);
+         */
+        activity.addContentView(pager, params);
+        WebViewPagerAdapter adapter = new WebViewPagerAdapter(activity, 5);
+        pager.setAdapter(adapter);
     }
 
     private FrameLayout.LayoutParams buildLayoutParams(MethodCall call) {

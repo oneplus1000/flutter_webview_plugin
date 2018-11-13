@@ -18,16 +18,13 @@ import android.widget.FrameLayout;
 import android.view.MotionEvent;
 import java.util.HashMap;
 import java.util.Map;
-
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-
 import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by lejard_h on 20/12/2017.
  */
-
 class WebviewManager {
     private final String TAG = "WebviewManager";
     private ValueCallback<Uri> mUploadMessage;
@@ -106,7 +103,6 @@ class WebviewManager {
                 FlutterWebviewPlugin.channel.invokeMethod("onScrollXChanged", xDirection);
                 // Log.d(TAG, "A x:" + x + " y:" + y);
             }
-
         });
 
         webView.setWebViewClient(webViewClient);
