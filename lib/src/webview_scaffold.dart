@@ -20,27 +20,29 @@ class WebviewScaffold extends StatefulWidget {
   final bool withLocalStorage;
   final bool withLocalUrl;
   final bool scrollBar;
+  final int viewpageCount;
 
   final Map<String, String> headers;
 
-  const WebviewScaffold(
-      {Key key,
-      this.appBar,
-      @required this.url,
-      this.headers,
-      this.withJavascript,
-      this.clearCache,
-      this.clearCookies,
-      this.enableAppScheme,
-      this.userAgent,
-      this.primary = true,
-      this.persistentFooterButtons,
-      this.bottomNavigationBar,
-      this.withZoom,
-      this.withLocalStorage,
-      this.withLocalUrl,
-      this.scrollBar})
-      : super(key: key);
+  const WebviewScaffold({
+    Key key,
+    this.appBar,
+    @required this.url,
+    this.headers,
+    this.withJavascript,
+    this.clearCache,
+    this.clearCookies,
+    this.enableAppScheme,
+    this.userAgent,
+    this.primary = true,
+    this.persistentFooterButtons,
+    this.bottomNavigationBar,
+    this.withZoom,
+    this.withLocalStorage,
+    this.withLocalUrl,
+    this.scrollBar,
+    this.viewpageCount,
+  }) : super(key: key);
 
   @override
   _WebviewScaffoldState createState() => new _WebviewScaffoldState();
@@ -68,18 +70,21 @@ class _WebviewScaffoldState extends State<WebviewScaffold> {
   Widget build(BuildContext context) {
     if (_rect == null) {
       _rect = _buildRect(context);
-      webviewReference.launch(widget.url,
-          headers: widget.headers,
-          withJavascript: widget.withJavascript,
-          clearCache: widget.clearCache,
-          clearCookies: widget.clearCookies,
-          enableAppScheme: widget.enableAppScheme,
-          userAgent: widget.userAgent,
-          rect: _rect,
-          withZoom: widget.withZoom,
-          withLocalStorage: widget.withLocalStorage,
-          withLocalUrl: widget.withLocalUrl,
-          scrollBar: widget.scrollBar);
+      webviewReference.launch(
+        widget.url,
+        headers: widget.headers,
+        withJavascript: widget.withJavascript,
+        clearCache: widget.clearCache,
+        clearCookies: widget.clearCookies,
+        enableAppScheme: widget.enableAppScheme,
+        userAgent: widget.userAgent,
+        rect: _rect,
+        withZoom: widget.withZoom,
+        withLocalStorage: widget.withLocalStorage,
+        withLocalUrl: widget.withLocalUrl,
+        scrollBar: widget.scrollBar,
+        viewpageCount: widget.viewpageCount,
+      );
     } else {
       final rect = _buildRect(context);
       if (_rect != rect) {

@@ -62,7 +62,7 @@ public class WebViewPagerAdapter extends PagerAdapter {
         boolean hidden = false;
         boolean clearCookies = false;
         String userAgent = null;
-        String url = "http://127.0.0.1:9999";
+        String url = "http://127.0.0.1:9999?position=" + position;
         Map<String, String> headers = null;
         boolean withZoom = false;
         boolean withLocalStorage = true;

@@ -155,19 +155,22 @@ class FlutterWebviewPlugin {
   /// - [withLocalUrl]: allow url as a local path
   ///     Allow local files on iOs > 9.0
   /// - [scrollBar]: enable or disable scrollbar
-  Future<Null> launch(String url,
-      {Map<String, String> headers,
-      bool withJavascript,
-      bool clearCache,
-      bool clearCookies,
-      bool hidden,
-      bool enableAppScheme,
-      Rect rect,
-      String userAgent,
-      bool withZoom,
-      bool withLocalStorage,
-      bool withLocalUrl,
-      bool scrollBar}) async {
+  Future<Null> launch(
+    String url, {
+    Map<String, String> headers,
+    bool withJavascript,
+    bool clearCache,
+    bool clearCookies,
+    bool hidden,
+    bool enableAppScheme,
+    Rect rect,
+    String userAgent,
+    bool withZoom,
+    bool withLocalStorage,
+    bool withLocalUrl,
+    bool scrollBar,
+    int viewpageCount,
+  }) async {
     final args = <String, dynamic>{
       'url': url,
       'withJavascript': withJavascript ?? true,
@@ -179,7 +182,8 @@ class FlutterWebviewPlugin {
       'withZoom': withZoom ?? false,
       'withLocalStorage': withLocalStorage ?? true,
       'withLocalUrl': withLocalUrl ?? false,
-      'scrollBar': scrollBar ?? true
+      'scrollBar': scrollBar ?? true,
+      'viewpageCount': viewpageCount ?? 0,
     };
 
     if (headers != null) {

@@ -105,6 +105,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         boolean withLocalStorage = call.argument("withLocalStorage");
         Map<String, String> headers = call.argument("headers");
         boolean scrollBar = call.argument("scrollBar");
+        int viewpageCount = call.argument("viewpageCount");
 
         if (webViewManager == null || webViewManager.closed == true) {
             webViewManager = new WebviewManager(activity);
@@ -112,7 +113,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
 
         FrameLayout.LayoutParams params = buildLayoutParams(call);
 
-        addContentView(activity, params);
+        addContentView(activity, params, viewpageCount);
         Log.d(TAG, "hidden:" + hidden + " url:" + url + " userAgent:" + userAgent + " withJavascript:" + withJavascript
                 + " clearCache:" + clearCache);
         Log.d(TAG, "clearCookies:" + clearCookies + " withZoom=" + withZoom + " withLocalStorage=" + withLocalStorage
@@ -126,7 +127,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         result.success(null);
     }
 
-    private void addContentView(Activity activity, FrameLayout.LayoutParams params) {
+    private void addContentView(Activity activity, FrameLayout.LayoutParams params, int viewpageCount) {
         ViewPager pager = new ViewPager(activity);
         /*
          * LinearLayout layout = new LinearLayout(activity); LinearLayout.LayoutParams
@@ -135,8 +136,10 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
          * LinearLayout.LayoutParams.MATCH_PARENT, 2f);
          * layout.setLayoutParams(layoutParams1); layout.addView(pager);
          */
+
+        // Log.d(TAG, "viewpageCount=" + viewpageCount);
         activity.addContentView(pager, params);
-        WebViewPagerAdapter adapter = new WebViewPagerAdapter(activity, 5);
+        WebViewPagerAdapter adapter = new WebViewPagerAdapter(activity, viewpageCount);
         pager.setAdapter(adapter);
     }
 
