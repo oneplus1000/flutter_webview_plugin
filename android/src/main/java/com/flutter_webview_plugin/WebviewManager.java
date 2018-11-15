@@ -286,7 +286,7 @@ class WebviewManager {
     void resize(FrameLayout.LayoutParams params) {
         webView.setLayoutParams(params);
     }
-
+  
     /**
      * Checks if going back on the Webview is possible.
      */

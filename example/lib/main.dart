@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     });
-
+/*
     _onScrollYChanged =
         flutterWebviewPlugin.onScrollYChanged.listen((double y) {
       if (mounted) {
@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     });
-
+*/
     _onStateChanged =
         flutterWebviewPlugin.onStateChanged.listen((WebViewStateChanged state) {
       if (mounted) {
