@@ -1,4 +1,6 @@
 #import "FlutterWebviewPlugin.h"
+//#include <syslog.h>
+
 
 static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
@@ -11,11 +13,15 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
 @implementation FlutterWebviewPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
+    //syslog(LOG_ALERT,"registerWithRegistrar");
+    //NSLog(@"sddsdsdsds dfdkjghdfukghrukd");
+    //printf("hshshshshshs xdsdsdsds");
     channel = [FlutterMethodChannel
                methodChannelWithName:CHANNEL_NAME
                binaryMessenger:[registrar messenger]];
     
-    UIViewController *viewController = (UIViewController *)registrar.messenger;
+    UIViewController *viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+    //UIViewController *viewController = (UIViewController *)registrar.messenger;
     FlutterWebviewPlugin* instance = [[FlutterWebviewPlugin alloc] initWithViewController:viewController];
     [registrar addMethodCallDelegate:instance channel:channel];
 }
@@ -28,12 +34,14 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     return self;
 }
 
-- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result { 
+    //syslog(LOG_ALERT,"xxxx");
     if ([@"launch" isEqualToString:call.method]) {
-        if (!self.webview)
+        if (!self.webview){
             [self initWebview:call];
-        else
+        }else{
             [self navigate:call];
+        }
         result(nil);
     } else if ([@"close" isEqualToString:call.method]) {
         [self closeWebView];
@@ -86,7 +94,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 }
 
 - (void)initWebview:(FlutterMethodCall*)call {
-
+    //NSLog(@"xxxx");
     NSNumber *clearCache = call.arguments[@"clearCache"];
     NSNumber *clearCookies = call.arguments[@"clearCookies"];
     NSNumber *hidden = call.arguments[@"hidden"];
@@ -123,7 +131,8 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     configuration.userContentController = controller; 
     
     //webview
-    self.webview = [[WKWebView alloc] initWithFrame:rc configuration:configuration ];
+    //self.webview = [[WKWebView alloc] initWithFrame:rc configuration:configuration ];
+    self.webview = [[WKWebView alloc] initWithFrame:rc];
     self.webview.navigationDelegate = self;
     self.webview.scrollView.delegate = self;
     self.webview.hidden = [hidden boolValue];
@@ -285,6 +294,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
                                   message:error.localizedDescription
                                   details:error.localizedFailureReason];
     [channel invokeMethod:@"onError" arguments:data];
+    //[channel invokeMethod:@"onError" arguments:@{@"code": [NSString stringWithFormat:@"%ld", error.code], @"error": error.localizedDescription}];
 }
 
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler {
