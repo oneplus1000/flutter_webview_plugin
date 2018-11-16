@@ -180,19 +180,10 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
         scrollviewWidth = scrollviewWidth + rc.size.width;
     }
     
-    
-    //[self.scrollview addSubview:button];
-    //[self.scrollview addSubview:button2];
     self.scrollview.contentSize = CGSizeMake(scrollviewWidth,rc.size.height);
-    
     [self.scrollview setBackgroundColor:[UIColor darkGrayColor]];
     [self.viewController.view addSubview:self.scrollview];
-    //[self.viewController.view addSubview:self.scrollview];
-
     _enableZoom = [withZoom boolValue];
-
-    //[self.viewController.view addSubview:self.webview];
-
     [self navigate:call];
 }
 
