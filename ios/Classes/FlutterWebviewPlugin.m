@@ -13,16 +13,13 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
 
 @implementation FlutterWebviewPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-    //syslog(LOG_ALERT,"registerWithRegistrar");
-    //NSLog(@"sddsdsdsds dfdkjghdfukghrukd");
-    //printf("hshshshshshs xdsdsdsds");
     channel = [FlutterMethodChannel
                methodChannelWithName:CHANNEL_NAME
                binaryMessenger:[registrar messenger]];
     
     UIViewController *viewController = [UIApplication sharedApplication].delegate.window.rootViewController;
-    //UIViewController *viewController = (UIViewController *)registrar.messenger;
     FlutterWebviewPlugin* instance = [[FlutterWebviewPlugin alloc] initWithViewController:viewController];
+    
     [registrar addMethodCallDelegate:instance channel:channel];
 }
 
@@ -103,6 +100,7 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     NSString *userAgent = call.arguments[@"userAgent"];
     NSNumber *withZoom = call.arguments[@"withZoom"];
     NSNumber *scrollBar = call.arguments[@"scrollBar"];
+    NSNumber *viewpageCount = call.arguments[@"viewpageCount"];
     
     if (clearCache != (id)[NSNull null] && [clearCache boolValue]) {
         [[NSURLCache sharedURLCache] removeAllCachedResponses];
@@ -130,9 +128,11 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     [controller addScriptMessageHandler:self name:@"flutterwebview"];
     configuration.userContentController = controller; 
     
+    
     //webview
-    //self.webview = [[WKWebView alloc] initWithFrame:rc configuration:configuration ];
-    self.webview = [[WKWebView alloc] initWithFrame:rc];
+    //CGRect rctest = CGRectMake(0,200,200,200);
+    self.webview = [[WKWebView alloc] initWithFrame:rc configuration:configuration ];
+    /*self.webview = [[WKWebView alloc] initWithFrame:rctest];
     self.webview.navigationDelegate = self;
     self.webview.scrollView.delegate = self;
     self.webview.hidden = [hidden boolValue];
@@ -140,10 +140,58 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
     self.webview.scrollView.showsVerticalScrollIndicator = [scrollBar boolValue];
     self.webview.scrollView.bounces = NO;
     self.webview.scrollView.pagingEnabled = true;
+    */
+ 
+    
+    
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [button setTitle:@"Show View" forState:UIControlStateNormal];
+    button.frame = CGRectMake(00.0, 210.0, 300.0, 40.0);
+    
+    UIButton *button2 = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [button2 setTitle:@"Show View" forState:UIControlStateNormal];
+    button2.frame = CGRectMake(300.0, 210.0, 300.0, 40.0);
+    
+    //scrollview
+    self.scrollview = [[UIScrollView alloc] initWithFrame:rc];//[[UIScrollView alloc] init];
+    self.scrollview.pagingEnabled = true;
+    //[self.scrollview addSubview:self.webview];
+    
+    
+    
+    int i = 0;
+    int size = viewpageCount.intValue;
+    self.webviews = [NSMutableArray arrayWithCapacity:size];
+    CGFloat scrollviewWidth = 0;
+    while(i < size){
+        CGRect subrc = CGRectMake(scrollviewWidth,0,rc.size.width,rc.size.height);
+        WKWebView *webview = [[WKWebView alloc] initWithFrame:subrc configuration:configuration ];
+        webview.navigationDelegate = self;
+        webview.scrollView.delegate = self;
+        webview.hidden = [hidden boolValue];
+        webview.scrollView.showsHorizontalScrollIndicator = [scrollBar boolValue];
+        webview.scrollView.showsVerticalScrollIndicator = [scrollBar boolValue];
+        webview.scrollView.bounces = NO;
+        webview.scrollView.pagingEnabled = true;
+        self.webviews[i] = webview;
+        [self.scrollview addSubview:webview];
+        i = i + 1;
+        scrollviewWidth = scrollviewWidth + rc.size.width;
+    }
+    
+    
+    //[self.scrollview addSubview:button];
+    //[self.scrollview addSubview:button2];
+    self.scrollview.contentSize = CGSizeMake(scrollviewWidth,rc.size.height);
+    
+    [self.scrollview setBackgroundColor:[UIColor darkGrayColor]];
+    [self.viewController.view addSubview:self.scrollview];
+    //[self.viewController.view addSubview:self.scrollview];
 
     _enableZoom = [withZoom boolValue];
 
-    [self.viewController.view addSubview:self.webview];
+    //[self.viewController.view addSubview:self.webview];
 
     [self navigate:call];
 }
@@ -193,6 +241,21 @@ static NSString *const CHANNEL_NAME = @"flutter_webview_plugin";
             }
             
             [self.webview loadRequest:request];
+            int size = (int)self.webviews.count;
+            int i = 0;
+            while(i < size){
+                NSString *pageUrl = [url stringByAppendingFormat: @"?position=%d", i];
+                NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:pageUrl]];
+                NSDictionary *headers = call.arguments[@"headers"];
+                
+                if (headers != nil) {
+                    [request setAllHTTPHeaderFields:headers];
+                }
+                
+                WKWebView *webview = self.webviews[i];
+                [webview loadRequest:request];
+                i = i + 1;
+            }
         }
     }
 }
