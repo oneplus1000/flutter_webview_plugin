@@ -141,6 +141,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         // layout.addView(pager);
 
         Log.d(TAG, "viewpageCount=" + viewpageCount);
+        pager.setBackgroundColor(0xff00ff00);
         activity.addContentView(pager, params);
         WebViewPagerAdapter adapter = new WebViewPagerAdapter(activity, viewpageCount);
         pager.setLayoutParams(params);
